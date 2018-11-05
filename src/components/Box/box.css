@@ -1,0 +1,17 @@
+.box {
+  box-sizing: border-box;
+  width: 20%;
+  height: 50px;
+  border: 1px solid black;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #cceacc;
+  float: left;
+  cursor:pointer;
+}
+
+.chosen{
+    background:#76d0f9;
+}
+ 
