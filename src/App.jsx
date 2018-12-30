@@ -1,12 +1,14 @@
 import React, { Component } from "react";
+import {connect} from 'react-redux';
 import Box from "./components/Box";
-
+import { firebaseConfig } from "./utils/firebaseConfig";
 import "./App.css";
 
 class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      playerName:"player1",
       allRandom: [],
       howMany: 25,
       selectedBoxes: [],
@@ -29,7 +31,8 @@ class App extends Component {
         rule11: [0, 6, 12, 18, 24],
         rule12: [4, 8, 12, 16, 20]
       },
-      isWin: []
+      isWin: [],
+      test: []
     };
     this.generateAllRandomNumbers = this.generateAllRandomNumbers.bind(this);
     this.generateUiBoxes = this.generateUiBoxes.bind(this);
@@ -38,9 +41,18 @@ class App extends Component {
     this.handleOnBoxClick = this.handleOnBoxClick.bind(this);
     this.checkTheWin = this.checkTheWin.bind(this);
   }
-  componentWillMount() {
+  componentDidMount = () => {
+    console.log("bingo component");
+    const {playerName, roomName} = this.props;
     this.generateAllRandomNumbers();
-  }
+    console.log({playerName, roomName});
+
+    var databaseRef = firebaseConfig
+      .database()
+      .ref()
+      .child("object");
+    databaseRef.on("value", snap => this.setState({ test: [snap.val()] }));
+  };
   componentDidUpdate(prevProps, prevState) {
     // console.log("prevState", this.state.isWin, prevState.isWin);
     // alert("updating");
@@ -58,8 +70,6 @@ class App extends Component {
     if (countTrues == 5) {
       alert("you won");
     }
-
-  
   }
 
   // shouldComponentUpdate(nextProps, nextState){
@@ -102,6 +112,8 @@ class App extends Component {
     this.setState({
       selectedBoxes: [...this.state.selectedBoxes, indexOfSelected]
     });
+
+    this.setTheValueInFirebaseDatabase()
   }
   generateUiBoxes() {
     console.log("generateUiBoxes");
@@ -157,17 +169,56 @@ class App extends Component {
     }
   }
 
+  setTheValueInFirebaseDatabase = () => {
+    const {roomName, playerName} = this.props;
+    var playersRef = firebaseConfig.database().ref(`game/${roomName}/${playerName}`);
+
+    playersRef.update({
+      info: {
+        allRandom: this.state.allRandom || [],
+        howMany: this.state.howMany || 25,
+        selectedBoxes: this.state.selectedBoxes || [],
+      }
+    })
+    // playersRef.set({
+    //   John: {
+    //     number: 1,
+    //     age: 30
+    //   },
+
+    //   Amanda: {
+    //     number: 2,
+    //     age: 20
+    //   }
+    // });
+    playersRef.set({
+      allRandom: [...this.state.allRandom],
+      howMany: this.state.howMany,
+      selectedBoxes: [...this.state.selectedBoxes],
+    })
+  };
+
   render() {
+    console.log("test", this.state.test);
     console.log("selected box", this.state.isWin);
     return (
       <div className="App">
         <div className="bingo">
+          {/* <pre>{this.state.test || "nothing"}</pre> */}
           <div className="game-wrapper">{this.generateUiBoxes()}</div>
         </div>
         <button onClick={() => window.location.reload()}>Generate new</button>
+        <button onClick={this.setTheValueInFirebaseDatabase()}>click me</button>
       </div>
     );
   }
 }
 
-export default App;
+const mapStateToProps = state => {
+  return {
+    playerName: state.playerInfo.playerName,
+    roomName: state.playerInfo.roomName
+  }
+}
+
+export default connect(mapStateToProps,null)(App);
