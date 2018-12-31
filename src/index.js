@@ -13,8 +13,8 @@ ReactDOM.render(
   <Provider store={store}>
     <BrowserRouter>
       <div>
-        <Route path="/bingo/game" component={App} />
-        <Route path="/bingo/" component={Login} />
+        <Route exact path="/bingo/game" component={App} />
+        <Route exact path="/bingo/" component={Login} />
       </div>
     </BrowserRouter>
   </Provider>,
