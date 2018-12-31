@@ -29,7 +29,7 @@ class Login extends Component {
         playerName: this.state.playerName,
         roomName: this.state.roomName
     });
-    this.props.history.push(`/bingo/game`);
+    this.props.history.push(`/game`);
   };
   componentDidMount = () => {
     var fb = firebaseConfig.database().ref("game/testing");
@@ -48,7 +48,7 @@ class Login extends Component {
     return (
       <div className="login-page">
         <Route exact path="/game" Component={App} />
-        <Route exact path="/bingo" Component={Login} />
+        <Route exact path="/" Component={Login} />
         <form
           className="pure-form pure-form-stacked"
           onSubmit={this.handleOnFormSubmit}
