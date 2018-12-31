@@ -257,7 +257,7 @@ class App extends Component {
     //     blockRender: true
     //   });
     // }
-    return <p>Wins</p>;
+    return <p>Congrats! You won the match</p>;
   };
 
   informOtherPlayer = () => {
