@@ -4,19 +4,19 @@ self.__precacheManifest = [
     "url": "/bingo/static/js/runtime~main.92310e24.js"
   },
   {
-    "revision": "ba02dc9cbdf3935b9ee9",
-    "url": "/bingo/static/js/main.ba02dc9c.chunk.js"
+    "revision": "2f55bb58e51a149544ca",
+    "url": "/bingo/static/js/main.2f55bb58.chunk.js"
   },
   {
     "revision": "8781e804615170a0d179",
     "url": "/bingo/static/js/1.8781e804.chunk.js"
   },
   {
-    "revision": "ba02dc9cbdf3935b9ee9",
+    "revision": "2f55bb58e51a149544ca",
     "url": "/bingo/static/css/main.658a94b5.chunk.css"
   },
   {
-    "revision": "fd36e0a05ec05c40b0091165ec055707",
+    "revision": "0037809740260e8f0d4a56c7da18859c",
     "url": "/bingo/index.html"
   }
 ];
