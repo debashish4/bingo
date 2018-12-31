@@ -248,7 +248,7 @@ class App extends Component {
   };
 
   redirectToLogin = () => {
-    this.props.history.push(`/`);
+    this.props.history.push(`/bingo/login`);
   };
 
   winnerMessage = () => {
