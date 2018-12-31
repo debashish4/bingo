@@ -47,8 +47,8 @@ class Login extends Component {
 
     return (
       <div className="login-page">
-        <Route exact path="/bingo/game" Component={App} />
-        <Route exact path="/bingo/login" Component={Login} />
+        <Route exact path="/game" Component={App} />
+        <Route exact path="/bingo" Component={Login} />
         <form
           className="pure-form pure-form-stacked"
           onSubmit={this.handleOnFormSubmit}
