@@ -1,2 +1,7 @@
-
+.new-game{
+    margin: 0 auto;
+    display: block!important;
+    position: relative;
+    top: 50px;
+}
 

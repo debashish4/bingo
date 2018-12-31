@@ -1,5 +1,6 @@
 import React, { Component } from "react";
-import {connect} from 'react-redux';
+import { connect } from "react-redux";
+import { Link } from "react-router-dom";
 import Box from "./components/Box";
 import { firebaseConfig } from "./utils/firebaseConfig";
 import "./App.css";
@@ -8,10 +9,13 @@ class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      playerName:"player1",
       allRandom: [],
       howMany: 25,
       selectedBoxes: [],
+      selectedNumbers: [],
+      currentlySelected: null,
+      currentlySelectedIndex: null,
+      otherPlayerSelectedNumbers: [],
       winRules: {
         //horizontal
         rule1: [0, 1, 2, 3, 4],
@@ -32,7 +36,9 @@ class App extends Component {
         rule12: [4, 8, 12, 16, 20]
       },
       isWin: [],
-      test: []
+      isWinner: false,
+      blockRender: false,
+      winnerMessage: ""
     };
     this.generateAllRandomNumbers = this.generateAllRandomNumbers.bind(this);
     this.generateUiBoxes = this.generateUiBoxes.bind(this);
@@ -42,20 +48,76 @@ class App extends Component {
     this.checkTheWin = this.checkTheWin.bind(this);
   }
   componentDidMount = () => {
-    console.log("bingo component");
-    const {playerName, roomName} = this.props;
+    const { playerName, roomName } = this.props;
     this.generateAllRandomNumbers();
-    console.log({playerName, roomName});
+    console.log({ playerName, roomName });
 
-    var databaseRef = firebaseConfig
-      .database()
-      .ref()
-      .child("object");
-    databaseRef.on("value", snap => this.setState({ test: [snap.val()] }));
+    // var databaseRef = firebaseConfig
+    //   .database()
+    //   .ref()
+    //   .child("object");
+    // databaseRef.on("value", snap => this.setState({ test: [snap.val()] }));
+
+    var fireBaseDbref = firebaseConfig.database().ref();
+    // fireBaseDbref.child(`game/${this.state.roomName}/`).on("value", snap => console.log("updated status is", snap.val()));
+
+    fireBaseDbref.child(`game/${this.props.roomName}`).on("value", snap => {
+      var allPlayerInfo = snap.val();
+      console.log("allPlayerInfo", allPlayerInfo);
+      if (allPlayerInfo) {
+        if (allPlayerInfo.winnerMessage) {
+          this.setState({
+            winnerMessage: allPlayerInfo.winnerMessage
+          });
+        }
+        for (let key in allPlayerInfo) {
+          if (key !== this.props.playerName) {
+            if (allPlayerInfo[key].currentlySelected) {
+              console.log("what is key", key);
+              //  if(allPlayerInfo[key].selectedBoxes){
+              console.log(
+                "other player no and its index in current player",
+                allPlayerInfo[key].currentlySelected,
+                this.state.allRandom.indexOf(
+                  allPlayerInfo[key].currentlySelected
+                )
+              );
+              this.setState(
+                {
+                  selectedBoxes: [
+                    ...this.state.selectedBoxes,
+                    this.state.allRandom.indexOf(
+                      allPlayerInfo[key].currentlySelected
+                    )
+                  ],
+                  selectedNumbers: [
+                    ...this.state.selectedNumbers,
+                    allPlayerInfo[key].currentlySelected
+                  ]
+                },
+                () => {
+                  this.checkTheWin();
+                }
+              );
+            }
+            //  }
+          }
+        }
+      }
+    });
   };
+
+  shouldComponentUpdate(nextProps, nextState) {
+    if (nextState.blockRender == true) {
+      return false;
+    }
+    return true;
+  }
   componentDidUpdate(prevProps, prevState) {
     // console.log("prevState", this.state.isWin, prevState.isWin);
     // alert("updating");
+    // () => {this.setTheValueInFirebaseDatabase()}
+    this.setTheValueInFirebaseDatabase();
     if (this.state.isWin == prevState.isWin) {
       this.checkTheWin();
     }
@@ -68,18 +130,18 @@ class App extends Component {
       }
     });
     if (countTrues == 5) {
-      alert("you won");
+      // alert("you won");
+      this.setState({
+        isWinner: true
+      });
+    }
+    if (this.state.isWinner) {
+      this.setState({
+        blockRender: true
+      });
     }
   }
 
-  // shouldComponentUpdate(nextProps, nextState){
-  //   console.log("shouldComponentUpdate", nextProps, nextState);
-  //   if(nextState !== this.state)
-  //   return true;
-  // }
-  // shouldComponentUpdate(){
-
-  // }
   generateAllRandomNumbers() {
     for (let i = 1; i <= this.state.howMany; i++) {
       var random = this.generateRandomNumber(this.state.howMany - 1);
@@ -101,25 +163,25 @@ class App extends Component {
   }
 
   handleOnBoxClick(e) {
-    console.log(e.target.textContent);
+    let selectedNumber = parseInt(e.target.textContent);
     // console.log(
     //   "index value is ",
     //   this.state.allRandom.indexOf(parseInt(e.target.textContent))
     // );
-    var indexOfSelected = this.state.allRandom.indexOf(
-      parseInt(e.target.textContent)
-    );
+    var indexOfSelected = this.state.allRandom.indexOf(selectedNumber);
+    console.log("selectedNumber", selectedNumber);
     this.setState({
-      selectedBoxes: [...this.state.selectedBoxes, indexOfSelected]
+      selectedBoxes: [...this.state.selectedBoxes, indexOfSelected],
+      selectedNumbers: [...this.state.selectedNumbers, selectedNumber],
+      currentlySelected: selectedNumber,
+      currentlySelectedIndex: indexOfSelected
     });
-
-    this.setTheValueInFirebaseDatabase()
   }
   generateUiBoxes() {
     console.log("generateUiBoxes");
     var allBoxes = [];
     this.state.allRandom.forEach((item, index) => {
-      if (this.state.selectedBoxes.indexOf(index) == -1) {
+      if (this.state.selectedNumbers.indexOf(item) == -1) {
         allBoxes.push(
           <Box
             isSelected={false}
@@ -170,36 +232,55 @@ class App extends Component {
   }
 
   setTheValueInFirebaseDatabase = () => {
-    const {roomName, playerName} = this.props;
-    var playersRef = firebaseConfig.database().ref(`game/${roomName}/${playerName}`);
+    const { roomName, playerName } = this.props;
+    var playersRef = firebaseConfig
+      .database()
+      .ref(`game/${roomName}/${playerName}`);
 
     playersRef.update({
-      info: {
-        allRandom: this.state.allRandom || [],
-        howMany: this.state.howMany || 25,
-        selectedBoxes: this.state.selectedBoxes || [],
-      }
-    })
-    // playersRef.set({
-    //   John: {
-    //     number: 1,
-    //     age: 30
-    //   },
-
-    //   Amanda: {
-    //     number: 2,
-    //     age: 20
-    //   }
-    // });
-    playersRef.set({
       allRandom: [...this.state.allRandom],
       howMany: this.state.howMany,
-      selectedBoxes: [...this.state.selectedBoxes],
-    })
+      // selectedBoxes: [...this.state.selectedBoxes],
+      // selectedNumbers:[...this.state.selectedNumbers],
+      currentlySelected: this.state.currentlySelected,
+      currentlySelectedIndex: this.state.currentlySelectedIndex
+    });
   };
 
+  redirectToLogin = () => {
+    this.props.history.push(`/`);
+  };
+
+  winnerMessage = () => {
+    // if (this.state.isWinner) {
+    //   this.setState({
+    //     blockRender: true
+    //   });
+    // }
+    return <p>Wins</p>;
+  };
+
+  informOtherPlayer = () => {
+    var playersRef = firebaseConfig
+      .database()
+      .ref(`game/${this.props.roomName}`);
+
+    playersRef.update({
+      winnerMessage: "Your opponent won the match"
+    });
+  };
+
+  componentWillUnmount() {
+    var roomRef = firebaseConfig
+    .database()
+    .ref(`game/${this.props.roomName}/`);
+    roomRef.off("value");
+    roomRef.remove();
+  }
+
+
   render() {
-    console.log("test", this.state.test);
+    console.log("test", this.state.playerTwoName);
     console.log("selected box", this.state.isWin);
     return (
       <div className="App">
@@ -207,8 +288,26 @@ class App extends Component {
           {/* <pre>{this.state.test || "nothing"}</pre> */}
           <div className="game-wrapper">{this.generateUiBoxes()}</div>
         </div>
-        <button onClick={() => window.location.reload()}>Generate new</button>
-        <button onClick={this.setTheValueInFirebaseDatabase()}>click me</button>
+        <div>{this.state.isWinner ? this.winnerMessage() : ""}</div>
+        <div>
+          {this.state.isWinner ? (
+            <button
+              onClick={this.informOtherPlayer}
+              className="pure-button pure-button-primary"
+            >
+              inform other user
+            </button>
+          ) : (
+            ""
+          )}
+        </div>
+        <div>{this.state.winnerMessage}</div>
+        <button
+          onClick={this.redirectToLogin}
+          className="new-game pure-button pure-button-primary"
+        >
+          New Game
+        </button>
       </div>
     );
   }
@@ -218,7 +317,10 @@ const mapStateToProps = state => {
   return {
     playerName: state.playerInfo.playerName,
     roomName: state.playerInfo.roomName
-  }
-}
+  };
+};
 
-export default connect(mapStateToProps,null)(App);
+export default connect(
+  mapStateToProps,
+  null
+)(App);
