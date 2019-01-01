@@ -14,7 +14,7 @@ export class Box extends Component {
         const {num, onClick, isSelected} = this.props;
         return(
             <div className={isSelected ? "chosen box":"box"} onClick={onClick}>
-                {num}
+                <p>{num}</p>
             </div>
         )
     }

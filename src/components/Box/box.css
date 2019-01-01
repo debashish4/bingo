@@ -3,15 +3,37 @@
   width: 20%;
   height: 50px;
   border: 1px solid black;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  text-align: center;
   background: #cceacc;
-  float: left;
-  cursor:pointer;
+  display: inline-block;
+  cursor: pointer;
+  transition: all 300ms;
 }
 
-.chosen{
-    background:#76d0f9;
+.chosen {
+  background: #76d0f9;
+  pointer-events: none;
+  animation: box-expand;
+  animation-duration: 1s;  
 }
- 
+
+.chosen p {
+  transform: scale(1.1);
+  transform-origin: center;
+}
+
+@keyframes box-expand {
+  0% {
+    transform: scale(1);
+  }
+  25% {
+    transform: scale(1.1);
+  }
+  50% {
+    background-color:white;
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}

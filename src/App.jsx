@@ -284,9 +284,9 @@ class App extends Component {
     console.log("selected box", this.state.isWin);
     return (
       <div className="App">
-        <div className="bingo">
+        <div className="bingo clearfix">
           {/* <pre>{this.state.test || "nothing"}</pre> */}
-          <div className="game-wrapper">{this.generateUiBoxes()}</div>
+          <div className="game-wrapper clearfix">{this.generateUiBoxes()}</div>
         </div>
         <div>{this.state.isWinner ? this.winnerMessage() : ""}</div>
         <div>

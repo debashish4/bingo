@@ -5,3 +5,17 @@
     top: 50px;
 }
 
+
+.clearfix {
+    clear:both
+}
+.clearfix:before{
+    content: "";
+    display: block;
+    clear: both;
+}
+.clearfix:after{
+    content: "";
+    display: block;
+    clear: both;
+}
