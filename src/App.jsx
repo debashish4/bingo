@@ -37,7 +37,7 @@ class App extends Component {
         rule12: [4, 8, 12, 16, 20]
       },
       isWin: [],
-      isWinner: true,
+      isWinner: false,
       blockRender: false,
       winnerMessage: ""
     };
