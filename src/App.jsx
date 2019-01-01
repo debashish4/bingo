@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import Box from "./components/Box";
 import { firebaseConfig } from "./utils/firebaseConfig";
 import "./App.css";
+import Message from "./components/Message.jsx";
 
 class App extends Component {
   constructor(props) {
@@ -36,7 +37,7 @@ class App extends Component {
         rule12: [4, 8, 12, 16, 20]
       },
       isWin: [],
-      isWinner: false,
+      isWinner: true,
       blockRender: false,
       winnerMessage: ""
     };
@@ -257,7 +258,8 @@ class App extends Component {
     //     blockRender: true
     //   });
     // }
-    return <p>Congrats! You won the match</p>;
+    this.informOtherPlayer();
+    return <Message text="Congrats! You won the match."></Message>;
   };
 
   informOtherPlayer = () => {
@@ -266,7 +268,7 @@ class App extends Component {
       .ref(`game/${this.props.roomName}`);
 
     playersRef.update({
-      winnerMessage: "Your opponent won the match"
+      winnerMessage: "Better luck next time. Your opponent has won the match"
     });
   };
 
@@ -284,23 +286,11 @@ class App extends Component {
     console.log("selected box", this.state.isWin);
     return (
       <div className="App">
-        <div className="bingo clearfix">
+        <div className="bingo clearfix" style={{"pointerEvents": this.state.winnerMessage ? "none": "initial"}}>
           {/* <pre>{this.state.test || "nothing"}</pre> */}
           <div className="game-wrapper clearfix">{this.generateUiBoxes()}</div>
         </div>
         <div>{this.state.isWinner ? this.winnerMessage() : ""}</div>
-        <div>
-          {this.state.isWinner ? (
-            <button
-              onClick={this.informOtherPlayer}
-              className="pure-button pure-button-primary"
-            >
-              inform other user
-            </button>
-          ) : (
-            ""
-          )}
-        </div>
         <div>{this.state.winnerMessage}</div>
         <button
           onClick={this.redirectToLogin}

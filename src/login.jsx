@@ -76,7 +76,7 @@ class Login extends Component {
                 className="pure-button pure-button-primary"
                 onClick={this.goToBingoGamePage}
               >
-                Create Room
+                Enter Room
               </button>
             </p>
             <p className="button">
